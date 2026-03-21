@@ -212,7 +212,7 @@ To use OpenAI's official API instead of a local service:
 
 ```python
 LLM_BASE_URL = "https://api.openai.com/v1"
-LLM_API_KEY = "your-api-key-here"  # Keep this private!
+LLM_API_KEY = "your-api-key-here"  # Keep this private, add to .env file!!
 LLM_MODEL = "gpt-3.5-turbo"  # or "gpt-4"
 ```
 
