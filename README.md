@@ -52,7 +52,7 @@ Depending on your LLM backend choice:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/ai-chat.git
+git clone https://github.com/sudipta-chaudhari/ai-chat.git
 cd ai-chat
 ```
 
@@ -340,8 +340,8 @@ This project is open-source and available under the MIT License. See LICENSE fil
 ## Support & Contact
 
 - 📧 **Email**: Not provided
-- 🐛 **Issues**: Report bugs on the [GitHub Issues page](https://github.com/yourusername/ai-chat/issues)
-- 💬 **Discussions**: Join conversations in [GitHub Discussions](https://github.com/yourusername/ai-chat/discussions)
+- 🐛 **Issues**: Report bugs on the [GitHub Issues page](https://github.com/sudipta-chaudhari/ai-chat/issues)
+- 💬 **Discussions**: Join conversations in [GitHub Discussions](https://github.com/sudipta-chaudhari/ai-chat/discussions)
 
 ---
 
