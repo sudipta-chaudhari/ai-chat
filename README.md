@@ -1,4 +1,4 @@
-# AI Chat
+# OpenAI Chatbot using Python
 
 A Python-based conversational AI chat application that seamlessly integrates with OpenAI models or compatible local LLM services. This project allows you to have interactive conversations while maintaining full conversation history.
 
