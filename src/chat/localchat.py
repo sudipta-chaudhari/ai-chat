@@ -31,16 +31,19 @@ def chat(messages):
         messages (list): The full list of chat messages for context.
         
     Returns:
-        str: The text content of the AI's response.
+        str: The text content of the AI's response, or an error message.
     """
-
-    # Create a chat completion request using parameters defined in config.py
-    response = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=messages,
-        temperature=LLM_TEMPERATURE, # Controls randomness/creativity
-        max_tokens=LLM_MAX_TOKENS # Limits the length of the generated output
-    )
-
-    # Extract and return only the text from the first completion choice
-    return response.choices[0].message.content
+    try:
+        # Create a chat completion request using parameters defined in config.py
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=messages,
+            temperature=LLM_TEMPERATURE,  # Controls randomness/creativity
+            max_tokens=LLM_MAX_TOKENS  # Limits the length of the generated output
+        )
+        
+        # Extract and return only the text from the first completion choice
+        return response.choices[0].message.content
+        
+    except Exception as e:
+        return f"Error: {str(e)}"
