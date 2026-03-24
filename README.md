@@ -86,62 +86,71 @@ pip install "openai>=1.3.0"
 
 ## Configuration
 
-The project uses a centralized configuration file to manage all LLM settings:
+The project uses a `Settings` class to manage all LLM configuration parameters. Configuration is defined in [`src/settings.py`](src/settings.py).
 
-### Default Configuration
+### Required Parameters
 
-Configuration is managed in [`src/config.py`](src/config.py):
+The `Settings` class requires **all 5 parameters** to be provided during initialization (no defaults):
 
-```python
-# LLM API Endpoint
-LLM_BASE_URL = "http://127.0.0.1:1234/v1"
-
-# API Key (for local models, this can be arbitrary)
-LLM_API_KEY = "not needed"
-
-# Model to use
-LLM_MODEL = "liquid/lfm2.5-1.2b"
-
-# Response randomness (0.0 = deterministic, 1.0 = creative)
-LLM_TEMPERATURE = 0.7
-
-# Maximum response length in tokens
-LLM_MAX_TOKENS = 512
-```
+| Parameter | Description | Type | Constraints |
+|-----------|-------------|------|-------------|
+| `base_url` | API endpoint URL | `str` | Must start with `http` or `https` |
+| `api_key` | Authentication key | `str` | Any string (local models may use "not needed") |
+| `model` | Model identifier | `str` | Model name/ID |
+| `temperature` | Response creativity | `float` | 0.0 - 1.0 |
+| `max_tokens` | Max response tokens | `int` | Positive integer |
 
 ### Customizing Configuration
 
-Edit [`src/config.py`](src/config.py) to modify parameters:
+Configure settings in [`main.py`](main.py) when creating the `Settings` instance:
 
-| Parameter | Description | Default | Range |
-|-----------|-------------|---------|-------|
-| `LLM_BASE_URL` | API endpoint URL | `http://127.0.0.1:1234/v1` | Any valid URL |
-| `LLM_API_KEY` | Authentication key | `"not needed"` | String |
-| `LLM_MODEL` | Model identifier | `liquid/lfm2.5-1.2b` | Model name |
-| `LLM_TEMPERATURE` | Response creativity | `0.7` | 0.0 - 1.0 |
-| `LLM_MAX_TOKENS` | Max response tokens | `512` | 1 - model limit |
+```python
+settings = Settings(
+    base_url="http://127.0.0.1:1234/v1",
+    api_key="not needed",
+    model="liquid/lfm2.5-1.2b",
+    temperature=0.7,
+    max_tokens=512
+)
+```
+
+All configuration values can be modified after creation using property setters:
+
+```python
+settings.temperature = 0.9  # Adjust creativity
+settings.max_tokens = 1024  # Increase response length
+```
 
 ### Using Environment Variables (Recommended for Production)
 
-For better security, use environment variables instead of hardcoding API keys:
+For better security, especially for API keys, use environment variables in [`main.py`](main.py):
+
+```python
+import os
+
+settings = Settings(
+    base_url=os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1"),
+    api_key=os.getenv("LLM_API_KEY", "not needed"),
+    model=os.getenv("LLM_MODEL", "liquid/lfm2.5-1.2b"),
+    temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
+    max_tokens=int(os.getenv("LLM_MAX_TOKENS", "512"))
+)
+```
+
+Then set environment variables:
 
 **On Windows (PowerShell):**
 ```powershell
 $env:LLM_API_KEY = "your-api-key-here"
-$env:LLM_BASE_URL = "your-endpoint-here"
+$env:LLM_BASE_URL = "https://api.openai.com/v1"
+$env:LLM_MODEL = "gpt-3.5-turbo"
 ```
 
 **On macOS/Linux (Bash):**
 ```bash
 export LLM_API_KEY="your-api-key-here"
-export LLM_BASE_URL="your-endpoint-here"
-```
-
-Then update `src/config.py` to read from environment variables:
-```python
-import os
-LLM_API_KEY = os.getenv("LLM_API_KEY", "not needed")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1")
+export LLM_BASE_URL="https://api.openai.com/v1"
+export LLM_MODEL="gpt-3.5-turbo"
 ```
 
 ---
@@ -157,21 +166,27 @@ python main.py
 ### Example Interaction
 
 ```
-Ask a question (or 'exit' to quit): What is machine learning?
-Answer: Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed...
+🤖 Chat initialized with model: liquid/lfm2.5-1.2b
+Type 'exit' to quit, 'clear' to clear conversation history
+--------------------------------------------------
 
-Ask a question (or 'exit' to quit): Can you give a simpler explanation?
-Answer: Sure! Machine learning is when computers learn patterns from data and make predictions without being told exactly how to do it...
+You: What is Machine Learning? Explain in one sentence. 
+Assistant: Machine learning is a subset of artificial intelligence that enables computers to learn patterns from data without being explicitly programmed.
 
-Ask a question (or 'exit' to quit): exit
+You: Write one more sentence.
+Assistant: Machine learning empowers systems to improve their performance on tasks through experience and data analysis.
+
+You: exit
+Goodbye!
 ```
 
 ### Commands
 
-| Command | Action |
-|---------|--------|
-| Type any question | Send message to the chat |
-| `exit` | Quit the application |
+| Command           | Action                       |
+|-------------------|------------------------------|
+| Type any question | Send message to the chat     |
+| `clear`           | Clear conversation history   |
+| `exit`            | Quit the application         |
 
 ---
 
@@ -181,21 +196,23 @@ Ask a question (or 'exit' to quit): exit
 ai-chat/
 ├── main.py                          # Application entry point
 ├── pyproject.toml                   # Project metadata and dependencies
-├── README.md                        # This file
+├── README.md                        # This file is primary documentation for a project
 ├── src/
-│   ├── __pycache__/                # Python bytecode cache
-│   ├── config.py                   # Configuration settings
+│   ├── __init__.py                 # Package initialization
+│   ├── settings.py                 # Configuration settings (Settings class)
 │   └── chat/
-│       ├── __pycache__/            # Python bytecode cache
-│       └── localchat.py            # Chat logic and LLM integration
-└── openai_chat.egg-info/           # Package metadata
+│       ├── __init__.py             # Package initialization
+│       ├── chat_client.py          # OpenAI client wrapper
+│       └── chat_session.py         # Conversation history management
+└── openai_chat.egg-info/           # Package metadata (generated)
 ```
 
 ### File Descriptions
 
 - **[main.py](main.py)**: Implements the CLI interface and main application loop
-- **[src/config.py](src/config.py)**: Centralized configuration management
-- **[src/chat/localchat.py](src/chat/localchat.py)**: Core chat functionality and OpenAI client initialization
+- **[src/settings.py](src/settings.py)**: `Settings` class with LLM configuration parameters
+- **[src/chat/chat_client.py](src/chat/chat_client.py)**: `ChatClient` class that handles API communication
+- **[src/chat/chat_session.py](src/chat/chat_session.py)**: `ChatSession` class for managing conversation history
 - **[pyproject.toml](pyproject.toml)**: Project metadata, version, and dependencies
 
 ---
@@ -208,12 +225,16 @@ To use OpenAI's official API instead of a local service:
 
 1. Create an OpenAI account at https://openai.com
 2. Generate an API key from your account dashboard
-3. Update `src/config.py`:
+3. Configure settings in [`main.py`](main.py) when creating the `Settings` instance:
 
 ```python
-LLM_BASE_URL = "https://api.openai.com/v1"
-LLM_API_KEY = "your-api-key-here"  # Keep this private, add to .env file!!
-LLM_MODEL = "gpt-3.5-turbo"  # or "gpt-4"
+settings = Settings(
+    base_url="https://api.openai.com/v1",
+    api_key="your-api-key-here",  # IMPORTANT: For production, use environment variables as shown above!
+    model="gpt-3.5-turbo",  # or "gpt-4"
+    temperature=0.7,
+    max_tokens=512
+)
 ```
 
 ### Setting Up with Local LLM Services
@@ -223,38 +244,44 @@ LLM_MODEL = "gpt-3.5-turbo"  # or "gpt-4"
 1. Download from https://lmstudio.ai
 2. Download a model in the LM Studio interface
 3. Start the local server (usually runs on `http://127.0.0.1:1234`)
-4. Keep default configuration in `src/config.py`
+4. Keep default configuration in `src/settings.py` (or override in `main.py`).
 
 #### Using Ollama
 
 1. Install from https://ollama.ai
 2. Pull a model: `ollama pull llama2`
 3. Models run on `http://127.0.0.1:11434` by default
-4. Update `src/config.py`:
+4. Update `src/settings.py` (or override in `main.py`):
 
 ```python
-LLM_BASE_URL = "http://127.0.0.1:11434/v1"
-LLM_MODEL = "llama2"
+# Example of overriding in main.py, before initializing ChatClient:
+settings.base_url = "http://127.0.0.1:11434/v1"
+settings.model = "llama2"
 ```
 
 ### Optimizing for Different Use Cases
 
+You can optimize the model's behavior by adjusting `temperature` and `max_tokens` settings. These are defined as default values in [`src/settings.py`](src/settings.py) and can be overridden in [`main.py`](main.py) before initializing the `ChatClient`.
+
 **For Factual/Precise Responses:**
 ```python
-LLM_TEMPERATURE = 0.1  # Lower temperature for consistency
-LLM_MAX_TOKENS = 256   # Shorter responses
+# Default in src/settings.py or override in main.py before initializing ChatClient:
+settings.temperature = 0.1  # Lower temperature = more deterministic/focused
+settings.max_tokens = 256   # Shorter responses for conciseness
 ```
 
 **For Creative Responses:**
 ```python
-LLM_TEMPERATURE = 0.9  # Higher temperature for variety
-LLM_MAX_TOKENS = 1024  # Longer responses
+# Default in src/settings.py or override in main.py before initializing ChatClient:
+settings.temperature = 0.9  # Higher temperature = more creative/varied
+settings.max_tokens = 1024  # Longer responses for richer content
 ```
 
-**For Balanced Performance:**
+**For Balanced Performance (Default):**
 ```python
-LLM_TEMPERATURE = 0.7  # Moderate creativity
-LLM_MAX_TOKENS = 512   # Moderate length
+# Default settings in src/settings.py:
+settings.temperature = 0.7  # Moderate creativity and consistency
+settings.max_tokens = 512   # Balanced response length
 ```
 
 ---
@@ -267,7 +294,7 @@ LLM_MAX_TOKENS = 512   # Moderate length
 
 **Solution**:
 1. Verify the LLM service is running on the configured URL
-2. Check `LLM_BASE_URL` in `src/config.py`
+2. Check `base_url` in `src/settings.py`
 3. Test the endpoint with: `curl http://127.0.0.1:1234/v1/models`
 
 ### Issue: "Authentication failed" error
@@ -275,7 +302,7 @@ LLM_MAX_TOKENS = 512   # Moderate length
 **Cause**: Invalid or missing API key
 
 **Solution**:
-1. For local models: Set `LLM_API_KEY = "not needed"` in `src/config.py`
+1. For local models: Set `api_key = "not needed"` in `src/settings.py`
 2. For OpenAI: Verify your API key is correct and active
 3. Check for typos or extra whitespace in the key
 
@@ -284,8 +311,8 @@ LLM_MAX_TOKENS = 512   # Moderate length
 **Cause**: Model is processing-intensive or network issues
 
 **Solution**:
-1. Reduce `LLM_MAX_TOKENS` in `src/config.py`
-2. Lower `LLM_TEMPERATURE` for simpler processing
+1. Reduce `max_tokens` in `src/settings.py`
+2. Lower `temperature` for simpler processing
 3. Check network connectivity
 4. Try a smaller or faster model
 
@@ -305,7 +332,7 @@ pip install "openai>=1.3.0"
 **Cause**: Specified model is not available
 
 **Solution**:
-1. Verify the model name in `LLM_MODEL`
+1. Verify the model name in `model`
 2. Ensure the model is downloaded/installed on your system
 3. Check available models: `ollama list` or your service's model manager
 

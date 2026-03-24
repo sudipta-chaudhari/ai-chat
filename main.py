@@ -1,38 +1,69 @@
-# Import the custom chat functions
-from src.chat.localchat import add_message, chat
+# Import the chat classes and settings
+from src.chat import ChatClient, ChatSession
+from src.settings import Settings
+
 
 def main():
     """
     Runs a continuous terminal-based chat loop that maintains conversation 
-    context by storing history in a local list.
+    context by storing history in a local ChatSession instance.
     """
-    # This list acts as the "short-term memory" for the session.
-    # It stores every exchange so the AI can remember previous questions.
-    messages = []
+
+    # Create settings ONCE at startup with desired configuration
+    settings = Settings(
+        base_url="http://127.0.0.1:1234/v1",  
+        api_key="not needed",
+        model="liquid/lfm2.5-1.2b",
+        temperature=0.7,  # Balanced randomness (0.0-1.0)
+        max_tokens=512    # Max response length in tokens
+    )
+
+    # Initialize the chat client and session
+    client = ChatClient(settings)
+    session = ChatSession()
+
+    print(f"🤖 Chat initialized with model: {settings.model}")
+    print("Type 'exit' to quit, 'clear' to clear conversation history")
+    print("-" * 50)
 
     # Start an infinite loop to allow for back-and-forth dialogue
     while True:
-        # Capture user input from the terminal and remove extra whitespace
-        user_query = input("\nAsk a question (or 'exit' to quit): ").strip()
-        
-        # Provide a clean way for the user to close the application
-        if user_query.lower() == 'exit':
-            break
+        try:
+            # Capture user input from the terminal and remove extra whitespace
+            user_query = input("\nYou: ").strip()
 
-        # 1. Store the user's prompt in the history list. 
-        # This tells the LLM: "The human just said this."
-        add_message(messages, "user", user_query)
-        
-         # 2. Package the entire history and send it to the model.
-        # The model processes the context and generates a response.
-        answer = chat(messages)
+            # Handle special commands
+            if user_query.lower() == "exit":
+                print("Goodbye!")
+                break
+            elif user_query.lower() == "clear":
+                session.clear()
+                print("Conversation history cleared.")
+                continue
+            elif not user_query:
+                continue
 
-        # Display the model's reply to the user        
-        print(f"Answer: {answer}")
+            # 1. Store the user's prompt in the session history.
+            # This tells the LLM: "The human just said this."
+            session.add("user", user_query)
 
-        # 3. CRITICAL STEP: Store the AI's answer back into history.
-        # Without this, the AI will "forget" what it just said in the next turn.
-        add_message(messages, "assistant", answer)
+            # 2. Package the entire history and send it to the model.
+            # The model processes the context and generates a response.
+            print("Assistant: ", end="", flush=True)
+            answer = client.send(session.get_all())
+
+            # Display the model's reply to the user
+            print(answer)
+
+            # 3. CRITICAL STEP: Store the AI's answer back into history.
+            # Without this, the AI will "forget" what it just said in the next turn.
+            session.add("assistant", answer)
+
+        except KeyboardInterrupt:
+            print("\n\nInterrupted. Type 'exit' to quit or continue chatting.")
+        except Exception as e:
+            print(f"\n❌ An error occurred: {e}")
+
 
 # Standard Python entry point: only run main() if this file is executed directly
 if __name__ == "__main__":
