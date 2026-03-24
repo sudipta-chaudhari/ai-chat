@@ -1,0 +1,40 @@
+# ==================== LLM (Large Language Model) Configuration ====================
+# Settings class that encapsulates all LLM configuration
+
+
+class Settings:
+    """
+    Encapsulates all LLM configuration settings.
+    Centralizes model parameters, API endpoint, and behavior controls.
+    """
+
+    def __init__(
+        self,
+        base_url: str = "http://127.0.0.1:1234/v1",
+        api_key: str = "not needed",
+        model: str = "liquid/lfm2.5-1.2b",
+        temperature: float = 0.7,
+        max_tokens: int = 512,
+    ):
+        """
+        Initialize LLM configuration settings.
+
+        Args:
+            base_url (str): BASE URL for the LLM API endpoint (running on local machine)
+            api_key (str): API KEY for the LLM API endpoint. With real API key, read from .env file, properties etc.
+            model (str): The specific model to use for chat completions
+            temperature (float): Controls randomness in LLM responses (0.0-1.0).
+                                 Lower values (closer to 0) = more deterministic/focused
+                                 Higher values (closer to 1) = more creative/varied
+            max_tokens (int): Maximum number of tokens that can be generated in the chat completion.
+                             Used to control costs for text generated via API.
+        """
+        self.base_url = base_url
+        self.api_key = api_key
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+
+
+# Create a default Settings instance for convenient access
+settings = Settings()

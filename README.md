@@ -86,62 +86,69 @@ pip install "openai>=1.3.0"
 
 ## Configuration
 
-The project uses a centralized configuration file to manage all LLM settings:
+The project uses a `Settings` class to manage all LLM configuration parameters. Configuration is defined in [`src/settings.py`](src/settings.py).
 
 ### Default Configuration
 
-Configuration is managed in [`src/config.py`](src/config.py):
+The default settings are:
 
 ```python
-# LLM API Endpoint
-LLM_BASE_URL = "http://127.0.0.1:1234/v1"
-
-# API Key (for local models, this can be arbitrary)
-LLM_API_KEY = "not needed"
-
-# Model to use
-LLM_MODEL = "liquid/lfm2.5-1.2b"
-
-# Response randomness (0.0 = deterministic, 1.0 = creative)
-LLM_TEMPERATURE = 0.7
-
-# Maximum response length in tokens
-LLM_MAX_TOKENS = 512
+base_url = "http://127.0.0.1:1234/v1"
+api_key = "not needed"
+model = "liquid/lfm2.5-1.2b"
+temperature = 0.7
+max_tokens = 512
 ```
 
 ### Customizing Configuration
 
-Edit [`src/config.py`](src/config.py) to modify parameters:
+You can customize settings in [`src/settings.py`](src/settings.py) by modifying the `Settings` class default parameters, or override them in [`main.py`](main.py) before initializing the `ChatClient`:
 
 | Parameter | Description | Default | Range |
 |-----------|-------------|---------|-------|
-| `LLM_BASE_URL` | API endpoint URL | `http://127.0.0.1:1234/v1` | Any valid URL |
-| `LLM_API_KEY` | Authentication key | `"not needed"` | String |
-| `LLM_MODEL` | Model identifier | `liquid/lfm2.5-1.2b` | Model name |
-| `LLM_TEMPERATURE` | Response creativity | `0.7` | 0.0 - 1.0 |
-| `LLM_MAX_TOKENS` | Max response tokens | `512` | 1 - model limit |
+| `base_url` | API endpoint URL | `http://127.0.0.1:1234/v1` | Any valid URL |
+| `api_key` | Authentication key | `"not needed"` | String |
+| `model` | Model identifier | `liquid/lfm2.5-1.2b` | Model name |
+| `temperature` | Response creativity | `0.7` | 0.0 - 1.0 |
+| `max_tokens` | Max response tokens | `512` | 1 - model limit |
 
 ### Using Environment Variables (Recommended for Production)
 
-For better security, use environment variables instead of hardcoding API keys:
+For better security, especially for API keys, use environment variables. Update [`src/settings.py`](src/settings.py) to read from environment:
+
+```python
+import os
+
+class Settings:
+    def __init__(
+        self,
+        base_url: str = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1"),
+        api_key: str = os.getenv("LLM_API_KEY", "not needed"),
+        model: str = os.getenv("LLM_MODEL", "liquid/lfm2.5-1.2b"),
+        temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.7")),
+        max_tokens: int = int(os.getenv("LLM_MAX_TOKENS", "512")),
+    ):
+        self.base_url = base_url
+        self.api_key = api_key
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+```
+
+Then set environment variables:
 
 **On Windows (PowerShell):**
 ```powershell
 $env:LLM_API_KEY = "your-api-key-here"
-$env:LLM_BASE_URL = "your-endpoint-here"
+$env:LLM_BASE_URL = "https://api.openai.com/v1"
+$env:LLM_MODEL = "gpt-3.5-turbo"
 ```
 
 **On macOS/Linux (Bash):**
 ```bash
 export LLM_API_KEY="your-api-key-here"
-export LLM_BASE_URL="your-endpoint-here"
-```
-
-Then update `src/config.py` to read from environment variables:
-```python
-import os
-LLM_API_KEY = os.getenv("LLM_API_KEY", "not needed")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1")
+export LLM_BASE_URL="https://api.openai.com/v1"
+export LLM_MODEL="gpt-3.5-turbo"
 ```
 
 ---
@@ -183,19 +190,21 @@ ai-chat/
 ├── pyproject.toml                   # Project metadata and dependencies
 ├── README.md                        # This file
 ├── src/
-│   ├── __pycache__/                # Python bytecode cache
-│   ├── config.py                   # Configuration settings
+│   ├── __init__.py                 # Package initialization
+│   ├── settings.py                 # Configuration settings (Settings class)
 │   └── chat/
-│       ├── __pycache__/            # Python bytecode cache
-│       └── localchat.py            # Chat logic and LLM integration
-└── openai_chat.egg-info/           # Package metadata
+│       ├── __init__.py             # Package initialization
+│       ├── chat_client.py          # OpenAI client wrapper
+│       └── chat_session.py         # Conversation history management
+└── openai_chat.egg-info/           # Package metadata (generated)
 ```
 
 ### File Descriptions
 
 - **[main.py](main.py)**: Implements the CLI interface and main application loop
-- **[src/config.py](src/config.py)**: Centralized configuration management
-- **[src/chat/localchat.py](src/chat/localchat.py)**: Core chat functionality and OpenAI client initialization
+- **[src/settings.py](src/settings.py)**: `Settings` class with LLM configuration parameters
+- **[src/chat/chat_client.py](src/chat/chat_client.py)**: `ChatClient` class that handles API communication
+- **[src/chat/chat_session.py](src/chat/chat_session.py)**: `ChatSession` class for managing conversation history
 - **[pyproject.toml](pyproject.toml)**: Project metadata, version, and dependencies
 
 ---
