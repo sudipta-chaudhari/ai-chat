@@ -90,14 +90,14 @@ The project uses a `Settings` class to manage all LLM configuration parameters. 
 
 ### Default Configuration
 
-The default settings are:
+The default settings are defined as constants in [`src/settings.py`](src/settings.py):
 
 ```python
-base_url = "http://127.0.0.1:1234/v1"
-api_key = "not needed"
-model = "liquid/lfm2.5-1.2b"
-temperature = 0.7
-max_tokens = 512
+DEFAULT_BASE_URL = "http://127.0.0.1:1234/v1"
+DEFAULT_API_KEY = "not needed"
+DEFAULT_MODEL = "liquid/lfm2.5-1.2b"
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_MAX_TOKENS = 512
 ```
 
 ### Customizing Configuration
@@ -106,11 +106,11 @@ You can customize settings in [`src/settings.py`](src/settings.py) by modifying 
 
 | Parameter | Description | Default | Range |
 |-----------|-------------|---------|-------|
-| `base_url` | API endpoint URL | `http://127.0.0.1:1234/v1` | Any valid URL |
-| `api_key` | Authentication key | `"not needed"` | String |
-| `model` | Model identifier | `liquid/lfm2.5-1.2b` | Model name |
-| `temperature` | Response creativity | `0.7` | 0.0 - 1.0 |
-| `max_tokens` | Max response tokens | `512` | 1 - model limit |
+| `base_url` | API endpoint URL | `DEFAULT_BASE_URL` | Any valid URL |
+| `api_key` | Authentication key | `DEFAULT_API_KEY` | String |
+| `model` | Model identifier | `DEFAULT_MODEL` | Model name |
+| `temperature` | Response creativity | `DEFAULT_TEMPERATURE` | 0.0 - 1.0 |
+| `max_tokens` | Max response tokens | `DEFAULT_MAX_TOKENS` | 1 - model limit |
 
 ### Using Environment Variables (Recommended for Production)
 

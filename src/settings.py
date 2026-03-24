@@ -1,6 +1,13 @@
 # ==================== LLM (Large Language Model) Configuration ====================
 # Settings class that encapsulates all LLM configuration
 
+# Default configuration constants
+DEFAULT_BASE_URL = "http://127.0.0.1:1234/v1"
+DEFAULT_API_KEY = "not needed"
+DEFAULT_MODEL = "liquid/lfm2.5-1.2b"
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_MAX_TOKENS = 512
+
 
 class Settings:
     """
@@ -8,13 +15,14 @@ class Settings:
     Centralizes model parameters, API endpoint, and behavior controls.
     """
 
+
     def __init__(
         self,
-        base_url: str = "http://127.0.0.1:1234/v1",
-        api_key: str = "not needed",
-        model: str = "liquid/lfm2.5-1.2b",
-        temperature: float = 0.7,
-        max_tokens: int = 512,
+        base_url: str = DEFAULT_BASE_URL,
+        api_key: str = DEFAULT_API_KEY,
+        model: str = DEFAULT_MODEL,
+        temperature: float = DEFAULT_TEMPERATURE,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
     ):
         """
         Initialize LLM configuration settings.
