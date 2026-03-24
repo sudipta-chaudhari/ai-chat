@@ -1,6 +1,6 @@
 # Import the chat classes and settings
 from src.chat import ChatClient, ChatSession
-from src.settings import settings
+from src.settings import Settings
 
 
 def main():
@@ -8,7 +8,16 @@ def main():
     Runs a continuous terminal-based chat loop that maintains conversation 
     context by storing history in a local ChatSession instance.
     """
-    
+
+    # Create settings ONCE at startup with desired configuration
+    settings = Settings(
+        base_url="http://127.0.0.1:1234/v1",  
+        api_key="not needed",
+        model="liquid/lfm2.5-1.2b",
+        temperature=0.7,  # Balanced randomness (0.0-1.0)
+        max_tokens=512    # Max response length in tokens
+    )
+
     # Initialize the chat client and session
     client = ChatClient(settings)
     session = ChatSession()

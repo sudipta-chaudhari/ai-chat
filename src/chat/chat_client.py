@@ -1,7 +1,6 @@
 # ChatClient handles communication with the LLM API
 
 from openai import OpenAI
-from src.settings import settings
 
 
 class ChatClient:
@@ -10,17 +9,13 @@ class ChatClient:
     Sends messages to the model and retrieves responses using configured settings.
     """
 
-    def __init__(self, settings_obj: object = None):
+    def __init__(self, settings_obj):
         """
         Initialize the chat client with LLM configuration.
 
         Args:
             settings_obj: Settings object containing API configuration.
-                         If None, uses the default settings instance from settings module.
         """
-        if settings_obj is None:
-            settings_obj = settings
-
         self.settings = settings_obj
 
         # Initialize the OpenAI client.

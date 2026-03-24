@@ -88,51 +88,53 @@ pip install "openai>=1.3.0"
 
 The project uses a `Settings` class to manage all LLM configuration parameters. Configuration is defined in [`src/settings.py`](src/settings.py).
 
-### Default Configuration
+### Required Parameters
 
-The default settings are defined as constants in [`src/settings.py`](src/settings.py):
+The `Settings` class requires **all 5 parameters** to be provided during initialization (no defaults):
 
-```python
-DEFAULT_BASE_URL = "http://127.0.0.1:1234/v1"
-DEFAULT_API_KEY = "not needed"
-DEFAULT_MODEL = "liquid/lfm2.5-1.2b"
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_MAX_TOKENS = 512
-```
+| Parameter | Description | Type | Constraints |
+|-----------|-------------|------|-------------|
+| `base_url` | API endpoint URL | `str` | Must start with `http` or `https` |
+| `api_key` | Authentication key | `str` | Any string (local models may use "not needed") |
+| `model` | Model identifier | `str` | Model name/ID |
+| `temperature` | Response creativity | `float` | 0.0 - 1.0 |
+| `max_tokens` | Max response tokens | `int` | Positive integer |
 
 ### Customizing Configuration
 
-You can customize settings in [`src/settings.py`](src/settings.py) by modifying the `Settings` class default parameters, or override them in [`main.py`](main.py) before initializing the `ChatClient`:
+Configure settings in [`main.py`](main.py) when creating the `Settings` instance:
 
-| Parameter | Description | Default | Range |
-|-----------|-------------|---------|-------|
-| `base_url` | API endpoint URL | `DEFAULT_BASE_URL` | Any valid URL |
-| `api_key` | Authentication key | `DEFAULT_API_KEY` | String |
-| `model` | Model identifier | `DEFAULT_MODEL` | Model name |
-| `temperature` | Response creativity | `DEFAULT_TEMPERATURE` | 0.0 - 1.0 |
-| `max_tokens` | Max response tokens | `DEFAULT_MAX_TOKENS` | 1 - model limit |
+```python
+settings = Settings(
+    base_url="http://127.0.0.1:1234/v1",
+    api_key="not needed",
+    model="liquid/lfm2.5-1.2b",
+    temperature=0.7,
+    max_tokens=512
+)
+```
+
+All configuration values can be modified after creation using property setters:
+
+```python
+settings.temperature = 0.9  # Adjust creativity
+settings.max_tokens = 1024  # Increase response length
+```
 
 ### Using Environment Variables (Recommended for Production)
 
-For better security, especially for API keys, use environment variables. Update [`src/settings.py`](src/settings.py) to read from environment:
+For better security, especially for API keys, use environment variables in [`main.py`](main.py):
 
 ```python
 import os
 
-class Settings:
-    def __init__(
-        self,
-        base_url: str = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1"),
-        api_key: str = os.getenv("LLM_API_KEY", "not needed"),
-        model: str = os.getenv("LLM_MODEL", "liquid/lfm2.5-1.2b"),
-        temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.7")),
-        max_tokens: int = int(os.getenv("LLM_MAX_TOKENS", "512")),
-    ):
-        self.base_url = base_url
-        self.api_key = api_key
-        self.model = model
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+settings = Settings(
+    base_url=os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1"),
+    api_key=os.getenv("LLM_API_KEY", "not needed"),
+    model=os.getenv("LLM_MODEL", "liquid/lfm2.5-1.2b"),
+    temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
+    max_tokens=int(os.getenv("LLM_MAX_TOKENS", "512"))
+)
 ```
 
 Then set environment variables:
@@ -223,13 +225,16 @@ To use OpenAI's official API instead of a local service:
 
 1. Create an OpenAI account at https://openai.com
 2. Generate an API key from your account dashboard
-3. Update `src/settings.py` (or override in `main.py`):
+3. Configure settings in [`main.py`](main.py) when creating the `Settings` instance:
 
 ```python
-# Example of overriding in main.py, before initializing ChatClient:
-settings.base_url = "https://api.openai.com/v1"
-settings.api_key = "your-api-key-here"  # IMPORTANT: For production, use environment variables as shown above!
-settings.model = "gpt-3.5-turbo"  # or "gpt-4"
+settings = Settings(
+    base_url="https://api.openai.com/v1",
+    api_key="your-api-key-here",  # IMPORTANT: For production, use environment variables as shown above!
+    model="gpt-3.5-turbo",  # or "gpt-4"
+    temperature=0.7,
+    max_tokens=512
+)
 ```
 
 ### Setting Up with Local LLM Services
