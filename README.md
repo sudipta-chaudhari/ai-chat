@@ -188,7 +188,7 @@ Ask a question (or 'exit' to quit): exit
 ai-chat/
 ├── main.py                          # Application entry point
 ├── pyproject.toml                   # Project metadata and dependencies
-├── README.md                        # This file
+├── README.md                        # This file is primary documentation for a project
 ├── src/
 │   ├── __init__.py                 # Package initialization
 │   ├── settings.py                 # Configuration settings (Settings class)
